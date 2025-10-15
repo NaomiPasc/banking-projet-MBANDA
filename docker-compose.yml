@@ -1,0 +1,67 @@
+version: '3.8'
+services:
+  bank-config-service:
+    build: ./bank-config-service
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_APPLICATION_NAME=bank-config-service
+      - SERVER_PORT=8080
+      - SPRING_CLOUD_CONFIG_SERVER_GIT_URI=https://github.com/NaomiPasc/banking-projet-MBANDA.git
+    networks:
+      - bank-network
+
+  mysql-db:
+    image: mysql:8
+    environment :
+      MYSQL_ROOT_PASSWORD : root
+      MYSQL_DATABASE : bank_user_db
+    ports:
+      - "3306:3307"
+    networks:
+      - bank-network
+
+  
+  bank-registry-service:
+    build: ./bank-registry-service
+    depends_on:
+      - serviceName: bank-config-service
+        condition: service_healthy
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_APPLICATION_NAME=bank-registry-service
+      - SPRING_CLOUD_CONFIG_URI=http://bank-config-service:8080
+      - SPRING_CONFIG_IMPORT=configserver:configserver:http://bank-config-service:8080
+    networks:
+      - bank-network
+
+  bank-user-service:
+    build: ./bank-user-service
+    depends_on:
+      - serviceName: bank-registry-service
+        condition: service_healthy
+      - serviceName: mysql-db
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_APPLICATION_NAME=bank-user-service
+      - SPRING_CLOUD_CONFIG_URI=http://bank-config-service:8080
+      - SPRING_CONFIG_IMPORT=configserver:configserver:http://bank-config-service:8080
+    networks:
+      - bank-network
+
+  bank-proxy-service:
+    build: ./bank-proxy-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_APPLICATION_NAME=bank-proxy-service
+      - SPRING_CLOUD_CONFIG_URI=http://bank-config-service:8080
+      - SPRING_CONFIG_IMPORT=configserver:http://bank-config-service:8080
+      
+  networks:
+    - bank-network:
+      driver: bridge
+    
