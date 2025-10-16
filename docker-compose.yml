@@ -51,10 +51,8 @@ services:
       - SPRING_CONFIG_IMPORT=configserver:configserver:http://bank-config-service:8080
     networks:
       - bank-network
-
-
-      
+     
   networks:
-    - bank-network:
+    bank-network:
       driver: bridge
     
