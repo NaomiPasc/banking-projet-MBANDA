@@ -52,14 +52,7 @@ services:
     networks:
       - bank-network
 
-  bank-proxy-service:
-    build: ./bank-proxy-service
-    ports:
-      - "8082:8082"
-    environment:
-      - SPRING_APPLICATION_NAME=bank-proxy-service
-      - SPRING_CLOUD_CONFIG_URI=http://bank-config-service:8080
-      - SPRING_CONFIG_IMPORT=configserver:http://bank-config-service:8080
+
       
   networks:
     - bank-network:
