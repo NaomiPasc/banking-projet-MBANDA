@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   bank-config-service:
-    build: ./bank-config-service
+    build: ../bank-config-service
     ports:
       - "8080:8080"
     environment:
@@ -10,6 +10,11 @@ services:
       - SPRING_CLOUD_CONFIG_SERVER_GIT_URI=https://github.com/NaomiPasc/banking-projet-MBANDA.git
     networks:
       - bank-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mysql-db:
     image: mysql:8
@@ -17,16 +22,20 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: bank_user_db
     ports:
-      - "3306:3307"
+      - "3307:3306"
     networks:
       - bank-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   
   bank-registry-service:
-    build: ./bank-registry-service
+    build: ../bank-registry-service
     depends_on:
-      bank-config-service:
-        condition: service_healthy
+    - bank-config-service
     ports:
       - "8761:8761"
     environment:
@@ -37,12 +46,10 @@ services:
       - bank-network
 
   bank-user-service:
-    build: ./bank-user-service
+    build: ../bank-user-service
     depends_on:
-      bank-registry-service:
-        condition: service_healthy
-      mysql-db:
-        condition: service_healthy
+    - bank-registry-service
+    - mysql-db
     ports:
       - "8081:8081"
     environment:
@@ -52,7 +59,7 @@ services:
     networks:
       - bank-network
      
-  networks:
-    bank-network:
-      driver: bridge
+networks:
+  bank-network:
+    driver: bridge
     
