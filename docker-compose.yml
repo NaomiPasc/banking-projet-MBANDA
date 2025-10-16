@@ -10,26 +10,17 @@ services:
       - SPRING_CLOUD_CONFIG_SERVER_GIT_URI=https://github.com/NaomiPasc/banking-projet-MBANDA.git
     networks:
       - bank-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+
 
   mysql-db:
     image: mysql:8
-    environment :
+    environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: bank_user_db
     ports:
       - "3307:3306"
     networks:
       - bank-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   
   bank-registry-service:
