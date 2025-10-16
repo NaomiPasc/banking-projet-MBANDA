@@ -35,27 +35,30 @@ services:
   bank-registry-service:
     build: ../bank-registry-service
     depends_on:
-    - bank-config-service
+      - bank-config-service
     ports:
       - "8761:8761"
     environment:
       - SPRING_APPLICATION_NAME=bank-registry-service
       - SPRING_CLOUD_CONFIG_URI=http://bank-config-service:8080
-      - SPRING_CONFIG_IMPORT=configserver:configserver:http://bank-config-service:8080
+      - SPRING_CONFIG_IMPORT=configserver:http://bank-config-service:8080
+      - EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE=http://localhost:8761/eureka/
+
     networks:
       - bank-network
 
   bank-user-service:
     build: ../bank-user-service
     depends_on:
-    - bank-registry-service
-    - mysql-db
+      - bank-config-service
+      - bank-registry-service
+      - mysql-db
     ports:
       - "8081:8081"
     environment:
       - SPRING_APPLICATION_NAME=bank-user-service
       - SPRING_CLOUD_CONFIG_URI=http://bank-config-service:8080
-      - SPRING_CONFIG_IMPORT=configserver:configserver:http://bank-config-service:8080
+      - SPRING_CONFIG_IMPORT=configserver:http://bank-config-service:8080
     networks:
       - bank-network
      
